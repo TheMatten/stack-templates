@@ -67,6 +67,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {-# START_FILE .github/workflows/hs-matrix.yml #-}
+{{<< >>}}
 on: [push, pull_request]
 name: build
 # adjust THISPACKAGE to be your package name and then have fun
@@ -79,7 +80,7 @@ defaults:
     shell: bash
 jobs:
   build:
-    runs-on: ${{{{ matrix.os }}}}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false # windows fails bench marking so i need to enable this for now
       matrix:
@@ -98,7 +99,7 @@ jobs:
             cabal: '3.2.0.0'
             # 8.10.2.2 is a bug fix for a bad windows packaging
             # i hope that actions/setup-haskell upstream does a fix to ghc latest to point to this
-    name: GHC${{{{ matrix.ghc }}}},cabal${{{{matrix.cabal}}}},${{{{matrix.os}}}}
+    name: GHC${{ matrix.ghc }},cabal${{matrix.cabal}},${{matrix.os}}
     # double curly brace is a javascript splice or something??
     steps:
       - uses: actions/checkout@v2
@@ -108,8 +109,8 @@ jobs:
         # less ci bump exhaustion this way
         uses: actions/setup-haskell@v1 # had to bump to .3 then .4, i'm tired :). I'd rather track close, but eh
         with:
-          ghc-version: ${{{{ matrix.ghc }}}}
-          cabal-version: ${{{{ matrix.cabal }}}}
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
       - run: cabal update
       - run: cabal clean
       - run: cabal configure $CONFIG
@@ -120,10 +121,10 @@ jobs:
           path: |
             c:\sr
             dist-newstyle
-          key: ${{{{ runner.os }}}}-${{{{ matrix.ghc }}}}-${{{{ hashFiles('cabal.project.freeze') }}}}
+          key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
           # restore keys is a fall back when the freeze plan is different
           restore-keys: |
-            ${{{{ runner.os }}}}-${{{{ matrix.ghc }}}}-
+            ${{ runner.os }}-${{ matrix.ghc }}-
         if:  matrix.os == 'windows-latest'
       - uses: actions/cache@v2
         name: ubuntu-linux and osx caching
@@ -131,10 +132,10 @@ jobs:
           path: |
             ~/.cabal/store
             dist-newstyle
-          key: ${{{{ runner.os }}}}-${{{{ matrix.ghc }}}}-${{{{ hashFiles('cabal.project.freeze') }}}}
+          key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
           # restore keys is a fall back when the freeze plan is different
           restore-keys: |
-            ${{{{ runner.os }}}}-${{{{ matrix.ghc }}}}-
+            ${{ runner.os }}-${{ matrix.ghc }}-
         if:  matrix.os != 'windows-latest'
       - run: cabal build  --only-dependencies
       - run: cabal build
@@ -142,4 +143,4 @@ jobs:
       # - run: cabal bench
       - run: cabal check
       - run: cabal sdist -o `pwd`
-      - run: cabal v1-install ${{THISPACKAGE}}*.tar.gz
+      - run: cabal v1-install ${THISPACKAGE}*.tar.gz
