@@ -70,9 +70,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 {{=<< >>=}}
 on: [push, pull_request]
 name: build
-# adjust THISPACKAGE to be your package name and then have fun
 env:
-      THISPACKAGE: safeword
+      THISPACKAGE: <<name>>
       CONFIG: --enable-tests
       # CONFIG: --enable-tests --enable-benchmarks
 defaults:
