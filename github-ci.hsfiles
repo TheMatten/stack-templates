@@ -68,6 +68,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {-# START_FILE .github/workflows/hs-matrix.yml #-}
 {{=<< >>=}}
+# Based on https://github.com/cartazio/safeword/blob/d9eb490aae843f096fab4c17524f13facba2d8d9/.github/workflows/hs-matrix.yml
 on: [push, pull_request]
 name: build
 env:
