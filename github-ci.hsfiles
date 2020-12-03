@@ -71,6 +71,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # This file was written by Carter Schonwald. Permission is granted to
 # reuse/adapt this in your own CI, as long as you include the original
 # license and copyright info and associated attributions.
+# Based on: https://github.com/cartazio/safeword/blob/d9eb490aae843f096fab4c17524f13facba2d8d9/.github/workflows/hs-matrix.yml
+
+# See comments for alternative options. 
 on: [push, pull_request]
 name: build
 env:
@@ -84,11 +87,12 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false # windows fails bench marking so i need to enable this for now
+      # Windows fails benchmarking, so this needs to be enabled for now.
+      fail-fast: false
       matrix:
         ghc:  ['7.10.3','8.0.2','8.2.2','8.4.4','8.6.5', '8.8.3','8.10.2','latest'] # ['7.0.4','7.2.2','7.4.2','7.6.3','7.8.4',
-        cabal: ['3.2.0.0'] # ,'latest'
-        os: [ubuntu-latest] #, macOS-latest, windows-latest]
+        cabal: ['3.2.0.0'] # , 'latest']
+        os: [ubuntu-latest] # , macOS-latest, windows-latest]
         include:
           - os: macOS-latest
             ghc: latest
@@ -97,19 +101,14 @@ jobs:
             ghc: latest
             cabal: latest
           - os: windows-latest
+            # Temporary workaround, see: https://github.com/actions/setup-haskell/issues/49
             ghc: '8.10.2.2'
             cabal: '3.2.0.0'
-            # 8.10.2.2 is a bug fix for a bad windows packaging
-            # i hope that actions/setup-haskell upstream does a fix to ghc latest to point to this
-    name: GHC${{ matrix.ghc }},cabal${{matrix.cabal}},${{matrix.os}}
-    # double curly brace is a javascript splice or something??
+    name: GHC${{ matrix.ghc }},cabal${{ matrix.cabal }},${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup Haskell
-        # uses: actions/setup-haskell@v1.1.4 # the .3 is a bug fix? as is .4
-        # the v1 tag tracks the most recent release for the setup-haskell plugin,
-        # less ci bump exhaustion this way
-        uses: actions/setup-haskell@v1 # had to bump to .3 then .4, i'm tired :). I'd rather track close, but eh
+        uses: actions/setup-haskell@v1
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
@@ -124,18 +123,18 @@ jobs:
             c:\sr
             dist-newstyle
           key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
-          # restore keys is a fall back when the freeze plan is different
+          # `restore-keys` is a fallback when the freeze plan is different.
           restore-keys: |
             ${{ runner.os }}-${{ matrix.ghc }}-
         if:  matrix.os == 'windows-latest'
       - uses: actions/cache@v2
-        name: ubuntu-linux and osx caching
+        name: Ubuntu and macOS caching
         with:
           path: |
             ~/.cabal/store
             dist-newstyle
           key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
-          # restore keys is a fall back when the freeze plan is different
+          # `restore-keys` is a fallback when the freeze plan is different.
           restore-keys: |
             ${{ runner.os }}-${{ matrix.ghc }}-
         if:  matrix.os != 'windows-latest'
